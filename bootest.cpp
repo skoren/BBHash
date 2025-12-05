@@ -19,7 +19,7 @@
 //#include <chrono>
 
 
-u_int64_t *data;
+u_int64_t *g_data;
 
 
 using namespace std;
@@ -536,18 +536,18 @@ int main (int argc, char* argv[]){
 		rng.seed(std::mt19937_64::default_seed); //default seed
 
 		//rng.seed(seed2); //random seed from timer
-		data = (u_int64_t * ) calloc(nelem+rab,sizeof(u_int64_t));
+		g_data = (u_int64_t * ) calloc(nelem+rab,sizeof(u_int64_t));
 
 		for (u_int64_t i = 1; i < nelem+rab; i++){
-			data[i] = rng();
+			g_data[i] = rng();
 		}
 		printf("de-duplicating items \n");
 
-		std::sort(data,data+nelem+rab);
+		std::sort(g_data,g_data+nelem+rab);
 
 		for (ii = 1, jj = 0; ii < nelem+rab; ii++) {
-			if (data[ii] != data[jj])
-				data[++jj] = data[ii];
+			if (g_data[ii] != g_data[jj])
+				g_data[++jj] = g_data[ii];
 		}
 		printf("found %lli duplicated items  \n",nelem+rab-(jj + 1) );
 	}
@@ -779,7 +779,7 @@ int main (int argc, char* argv[]){
 		}
 		else
 		{
-			auto data_iterator = boomphf::range(static_cast<const u_int64_t*>(data), static_cast<const u_int64_t*>(data+nelem));
+			auto data_iterator = boomphf::range(static_cast<const u_int64_t*>(g_data), static_cast<const u_int64_t*>(g_data+nelem));
 			bphf = new boomphf::mphf<u_int64_t,hasher_t>(nelem,data_iterator,nthreads,gammaFactor,write_each);
 		}
 
@@ -830,7 +830,7 @@ int main (int argc, char* argv[]){
 	}
 	else if(check_correctness &&  !from_disk )
 	{
-		auto data_iterator = boomphf::range(static_cast<const u_int64_t*>(data), static_cast<const u_int64_t*>(data+nelem));
+		auto data_iterator = boomphf::range(static_cast<const u_int64_t*>(g_data), static_cast<const u_int64_t*>(g_data+nelem));
 		check_mphf_correctness(bphf ,data_iterator);
 	}
 
@@ -851,7 +851,7 @@ int main (int argc, char* argv[]){
 	}
 	else if(bench_lookup &&  !from_disk)
 	{
-		auto data_iterator = boomphf::range(static_cast<const u_int64_t*>(data), static_cast<const u_int64_t*>(data+nelem));
+		auto data_iterator = boomphf::range(static_cast<const u_int64_t*>(g_data), static_cast<const u_int64_t*>(g_data+nelem));
 
 		bench_mphf_lookup(bphf,data_iterator);
 	}
@@ -907,7 +907,7 @@ int main (int argc, char* argv[]){
 	
 
 	if(!from_disk){
-		free(data);
+		free(g_data);
 	}
 
 		delete bphf;
